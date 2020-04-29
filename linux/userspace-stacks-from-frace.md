@@ -116,3 +116,90 @@ File.open(trace_file) do |f|
   end
 end
 ```
+
+The resulting output will look like this:
+```bash
+# tracer: function
+#
+# entries-in-buffer/entries-written: 45330/6194959   #P:1
+#
+#                              _-----=> irqs-off
+#                             / _----=> need-resched
+#                            | / _---=> hardirq/softirq
+#                            || / _--=> preempt-depth
+#                            ||| /     delay
+#           TASK-PID   CPU#  ||||    TIMESTAMP  FUNCTION
+#              | |       |   ||||       |         |
+             foo-3444  [000] .... 123215.643607: __hrtimer_init <-hrtimer_nanosleep
+             foo-3444  [000] .... 123215.643607: do_nanosleep <-hrtimer_nanosleep
+...
+ =>  <syscall.Syscall6>
+ =>  <internal/poll.(*FD).WriteTo>
+ =>  <net.(*netFD).writeTo>
+ =>  <net.(*conn).Close>
+ =>  <net/http.persistConnWriter.ReadFrom>
+ =>  <bufio.(*Writer).Write>
+ =>  <net/http.(*persistConn).wroteRequest>
+ =>  <runtime.gcWriteBarrier>
+             foo-3445  [000] .... 123215.644747: SyS_write <-do_syscall_64
+             foo-3445  [000] .... 123215.644747: __fdget_pos <-SyS_write
+             foo-3445  [000] .... 123215.644748: __fget_light <-__fdget_pos
+             foo-3445  [000] .... 123215.644748: __fget <-__fget_light
+             foo-3445  [000] .... 123215.644749: vfs_write <-SyS_write
+             foo-3445  [000] .... 123215.644749: rw_verify_area <-vfs_write
+             foo-3445  [000] .... 123215.644749: security_file_permission <-rw_verify_area
+             foo-3445  [000] .... 123215.644750: apparmor_file_permission <-security_file_permission
+             foo-3445  [000] .... 123215.644750: common_file_perm <-apparmor_file_permission
+             foo-3445  [000] .... 123215.644751: aa_file_perm <-common_file_perm
+             foo-3445  [000] .... 123215.644751: __vfs_write <-vfs_write
+             foo-3445  [000] .... 123215.644751: new_sync_write <-__vfs_write
+             foo-3445  [000] .... 123215.644752: sock_write_iter <-new_sync_write
+             foo-3445  [000] .... 123215.644752: sock_sendmsg <-sock_write_iter
+             foo-3445  [000] .... 123215.644752: security_socket_sendmsg <-sock_sendmsg
+             foo-3445  [000] .... 123215.644753: apparmor_socket_sendmsg <-security_socket_sendmsg
+             foo-3445  [000] .... 123215.644753: aa_sock_msg_perm <-apparmor_socket_sendmsg
+             foo-3445  [000] .... 123215.644753: aa_sk_perm <-aa_sock_msg_perm
+             foo-3445  [000] .... 123215.644754: inet_sendmsg <-sock_sendmsg
+             foo-3445  [000] .... 123215.644754: tcp_sendmsg <-inet_sendmsg
+             foo-3445  [000] .... 123215.644754: lock_sock_nested <-tcp_sendmsg
+             foo-3445  [000] .... 123215.644754: _cond_resched <-lock_sock_nested
+             foo-3445  [000] .... 123215.644755: rcu_all_qs <-_cond_resched
+             foo-3445  [000] .... 123215.644755: _raw_spin_lock_bh <-lock_sock_nested
+             foo-3445  [000] .... 123215.644755: __local_bh_enable_ip <-lock_sock_nested
+             foo-3445  [000] .... 123215.644756: tcp_sendmsg_locked <-tcp_sendmsg
+             foo-3445  [000] .... 123215.644756: tcp_rate_check_app_limited <-tcp_sendmsg_locked
+             foo-3445  [000] .... 123215.644756: tcp_send_mss <-tcp_sendmsg_locked
+             foo-3445  [000] .... 123215.644756: tcp_current_mss <-tcp_send_mss
+             foo-3445  [000] .... 123215.644757: ipv4_mtu <-tcp_current_mss
+             foo-3445  [000] .... 123215.644757: tcp_established_options <-tcp_current_mss
+             foo-3445  [000] .... 123215.644758: tcp_v4_md5_lookup <-tcp_established_options
+...
+ =>  <syscall.Syscall6>
+ =>  <internal/poll.(*FD).ReadFrom>
+ =>  <net.(*netFD).readFrom>
+ =>  <net.(*conn).Write>
+ =>  <net/http.newBufioReader>
+ =>  <bufio.(*Reader).Peek>
+ =>  <bufio.(*Reader).ReadLine>
+ =>  <bufio.(*Reader).WriteTo>
+             foo-3443  [000] .... 123215.645108: SyS_read <-do_syscall_64
+             foo-3443  [000] .... 123215.645108: __fdget_pos <-SyS_read
+             foo-3443  [000] .... 123215.645109: __fget_light <-__fdget_pos
+             foo-3443  [000] .... 123215.645109: __fget <-__fget_light
+             foo-3443  [000] .... 123215.645109: vfs_read <-SyS_read
+             foo-3443  [000] .... 123215.645110: rw_verify_area <-vfs_read
+             foo-3443  [000] .... 123215.645110: security_file_permission <-rw_verify_area
+             foo-3443  [000] .... 123215.645110: apparmor_file_permission <-security_file_permission
+             foo-3443  [000] .... 123215.645111: common_file_perm <-apparmor_file_permission
+             foo-3443  [000] .... 123215.645111: aa_file_perm <-common_file_perm
+             foo-3443  [000] .... 123215.645112: __fsnotify_parent <-security_file_permission
+             foo-3443  [000] .... 123215.645112: fsnotify <-security_file_permission
+             foo-3443  [000] .... 123215.645112: __vfs_read <-vfs_read
+             foo-3443  [000] .... 123215.645112: new_sync_read <-__vfs_read
+             foo-3443  [000] .... 123215.645113: sock_read_iter <-new_sync_read
+             foo-3443  [000] .... 123215.645113: sock_recvmsg <-sock_read_iter
+             foo-3443  [000] .... 123215.645113: security_socket_recvmsg <-sock_recvmsg
+             foo-3443  [000] .... 123215.645114: apparmor_socket_recvmsg <-security_socket_recvmsg
+             foo-3443  [000] .... 123215.645114: aa_sock_msg_perm <-apparmor_socket_recvmsg
+             foo-3443  [000] .... 123215.645114: aa_sk_perm <-aa_sock_msg_perm
+```
