@@ -22,9 +22,15 @@ tracing=/sys/kernel/tracing
 
 # Enable syscall events to collect userspace stacks from
 echo 1 > $tracing/events/raw_syscalls/enable
+# Trace events on every context switch.
+# This happens at a reasonable frequency to be fairly useful.
+# If you want to trigger on a different event take a look at
+# `sudo perf stat -e 'sched:*' -a -- sleep 1` for some options.
+echo 1 > $tracing/events/sched/sched_switch/enable
 
-# enable the function tracer
-echo function > $tracing/current_tracer
+# Only get traces from the above event. You can set this
+# to 'function' instead to also see kernel function calls.
+echo nop > $tracing/current_tracer
 
 # enable the userstacktrace option
 echo userstacktrace > $tracing/trace_options
