@@ -20,12 +20,11 @@ instead of by event but it doesn't seem like you can do that with ftrace.
 
 tracing=/sys/kernel/tracing
 
-# Enable syscall events to collect userspace stacks from
-echo 1 > $tracing/events/raw_syscalls/enable
 # Trace events on every context switch.
 # This happens at a reasonable frequency to be fairly useful.
 # If you want to trigger on a different event take a look at
-# `sudo perf stat -e 'sched:*' -a -- sleep 1` for some options.
+# `sudo perf stat -e 'sched:*' -a -- sleep 1` for some options
+# (like sched:sched_stat_runtime).
 echo 1 > $tracing/events/sched/sched_switch/enable
 
 # Only get traces from the above event. You can set this
@@ -44,8 +43,8 @@ echo event-fork > $tracing/trace_options
 
 # only trace functions in the pid we care about
 # if you have a running process with multiple threads
-# use `ps -T -p SOME_PROCESS_PID -o tid= > $tracing/set_ftrace_pid
-echo SOME_PROCESS_PID > $tracing/set_ftrace_pid
+# use `ps -T -p SOME_PROCESS_PID -o tid= > $tracing/set_event_pid
+echo SOME_PROCESS_PID > $tracing/set_event_pid
 
 # start tracing
 echo 1 > $tracing/tracing_on
@@ -103,16 +102,19 @@ File.open(symbol_file) do |f|
     # append addr and function_name
     symbols << [fields[0].to_i(16), fields[5]]
   end
+  symbols << [0xffffffffffffffff, 'END_SYMBOL']
 end
+
+symbols.sort! {|a,b| a[0] <=> b[0] }
 
 File.open(trace_file) do |f|
   f.each_line do |l|
 
     if m = l.match(/^\s+=>\s+<([0-9a-f]+)>\s*$/)
       addr = m[1].to_i(16)
-      symbolMatch = symbols.bsearch {|s| s[0] >= addr }
-      if symbolMatch
-        puts " =>  <#{symbolMatch[1]}>"
+      idx = symbols.bsearch_index {|s| s[0] >= addr }
+      if idx
+        puts " =>  <#{symbols[idx-1][1]}>"
       else
         print l
       end
@@ -208,4 +210,37 @@ The resulting output will look like this:
              foo-3443  [000] .... 123215.645114: apparmor_socket_recvmsg <-security_socket_recvmsg
              foo-3443  [000] .... 123215.645114: aa_sock_msg_perm <-apparmor_socket_recvmsg
              foo-3443  [000] .... 123215.645114: aa_sk_perm <-aa_sock_msg_perm
+```
+
+If you want to transform the user stacks into a flamegraph you can use the following stackcollapse:
+
+```ruby
+#!/usr/bin/env ruby
+
+File.open("/tmp/trace") do |f|
+  if ARGV.length < 1
+    STDERR.puts("usage: #{$0} <trace_file>")
+    exit 1
+  end
+  stack = []
+
+  lines = {}
+
+  f.each_line do |l|
+    if m = l.match(/\s+=>\s+<([^>]+)>/)
+      stack << m[1]
+    else
+      if stack.length > 0
+        l = stack.reverse.join(";")
+        lines[l] ||= 0
+        lines[l] += 1
+        stack = []
+      end
+    end
+  end
+
+  lines.each do |l, c|
+    puts "#{l} #{c}"
+  end
+end
 ```
