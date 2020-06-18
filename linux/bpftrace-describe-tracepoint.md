@@ -19,3 +19,21 @@ have to use arg0..argN.
 
 You also can't inspect fields of type `__data_loc` right now:
 https://github.com/iovisor/bpftrace/issues/385.
+
+You can work around that by manually declaring and casting the type
+(https://github.com/iovisor/bpftrace/issues/999):
+```
+#include <linux/types.h>
+
+struct data {
+  long pad;
+  int filename;
+  int flags;
+  int mode;
+}
+
+tracepoint:fs:do_sys_open {
+  $data = (struct data*)args;
+  printf("filename=%s\n", str((uint64)args + (uint64)($data->filename & 0xFFFF)));
+}
+```
