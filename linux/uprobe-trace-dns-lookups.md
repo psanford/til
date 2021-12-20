@@ -81,6 +81,7 @@ If you need to trace multiple functions at once you'll have to set this up yours
 
 Using the locations of the functions from the objdump above add trace points to ftrace:
 
+```
  echo '
 > p:uprobes/getaddrinfo /lib/x86_64-linux-gnu/libc.so.6:0x0000000000108fb0 arg1=+0(%di):string
 > p:uprobes/gethostbyname /lib/x86_64-linux-gnu/libc.so.6:0x00000000001336a0   arg1=+0(%di):string
