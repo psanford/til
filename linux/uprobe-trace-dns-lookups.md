@@ -19,7 +19,24 @@ $ objdump -tT /lib/x86_64-linux-gnu/libc.so.6 | awk -v sym=getaddrinfo  '$NF == 
 
 The 'name' argument is the first argument for all of these functions. On x86-64, the pointer to the string will be in %rdi.
 
-If you didn't know that, you can run a program under gdb and set a breakpoint in the function to figure this out:
+If you didn't know that you can ask `perf probe`:
+```
+# run perf probe -V to see argument names
+$ perf probe -x /lib/x86_64-linux-gnu/libc.so.6 -V  getaddrinfo
+Available variables at getaddrinfo
+        @<getaddrinfo+0>
+                char*   __PRETTY_FUNCTION__
+                char*   name
+                char*   service
+                struct addrinfo*        hints
+                struct addrinfo**       pai
+
+# run perf probe -D to see what it would add to the uprobe_events
+$ perf probe  -x /lib/x86_64-linux-gnu/libc.so.6 -D 'getaddrinfo name:string'
+p:probe_libc/getaddrinfo /lib/x86_64-linux-gnu/libc-2.31.so:0x108fb0 name_string=+0(%di):string
+```
+
+You could also run a program under gdb and set a breakpoint in the function to figure this out:
 ```
 /tmp$ gdb foo
 (gdb) b gethostbyname
