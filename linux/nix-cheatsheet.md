@@ -27,6 +27,12 @@ sudo nixos-rebuild switch
 ```
 
 
+Delete specific generations:
+```
+sudo nix-env --profile /nix/var/nix/profiles/system --delete-generations 225 224 223 222
+```
+
+
 ## Overrides
 
 # Patch a build:
