@@ -12,13 +12,13 @@ keyring in a single terminal:
 keyctl session -
 
 # add a key to the keyring
-pass some/secret | head -1 | keyctl add user my\_key\_name @s
+pass some/secret | head -1 | keyctl add user my_key_name @s
 
 # show current keyring
 keyctl show
 
 # use keyctl as password for some process:
-export FOOBAR\_PASSWORD\_COMMAND="keyctl pipe $(keyctl search @s user my\_key\_name)"
+export FOOBAR_PASSWORD_COMMAND="keyctl pipe $(keyctl search @s user my_key_name)"
 ```
 
 
