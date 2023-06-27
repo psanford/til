@@ -77,3 +77,11 @@ Pin an old version:
 -    gnupg
 +    pinGPGPkgs.gnupg
 ```
+
+# Build a package
+
+To build a local package with dependencies, where the local package is systray-inbox.nix:
+
+```
+$ nix-build -K -E 'with import <nixpkgs> {}; callPackage ./systray-inbox.nix {}'
+```
