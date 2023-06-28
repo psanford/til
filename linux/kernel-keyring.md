@@ -12,7 +12,7 @@ keyring in a single terminal:
 keyctl session -
 
 # add a key to the keyring
-pass some/secret | head -1 | keyctl add user my_key_name @s
+pass some/secret | head -1 | keyctl padd user my_key_name @s
 
 # show current keyring
 keyctl show
