@@ -23,7 +23,7 @@ Once you get digital terminals, there's no reason to have two buttons do that ac
 | Backspace    | 0x7F | Ctrl-?        | DEL                  |
 | Del          | 0x08 | Ctrl-H        | BS  '\b' (backspace) |
 
-That's a bit confusing but is simple enough. But why are there two ways to send these characters, either with the dedicated key Backspace/Del or by pressing Ctrl-?/Ctrl-H ? That is a legacy of how control keys were implemented in ascii. To send a control code say 'End of Transmission', you would push Ctrl + the character that is forward 60 characters in the ascii table. So EOT(0x04) + 64(0x40) == 'D' (0x44) i.e ctrl-D sends EOT.
+That's a bit confusing but is simple enough. But why are there two ways to send these characters, either with the dedicated key Backspace/Del or by pressing Ctrl-?/Ctrl-H ? That is a legacy of how control keys were implemented in ascii. To send a control code say 'End of Transmission', you would push Ctrl + the character that is forward 64 characters in the ascii table. So EOT(0x04) + 64(0x40) == 'D' (0x44) i.e ctrl-D sends EOT.
 
 This is nice and simple, but as soon as we want to make more interesting applications it starts to get in the way. Interactive applications that use the terminal in raw mode might want to map ctrl-h to a help function, but that won't work if we also expect the delete key to delete characters. There's also the problem of wanting to use ctrl-Backspace to do something interesting. If the terminal just applies the default mapping of add 0x40 to any key when ctrl is also held, that would just send a 'H' which we probably don't want to remap to something besides `insert character H`.
 
