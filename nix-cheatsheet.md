@@ -9,13 +9,13 @@ sudo nix-env --list-generations --profile /nix/var/nix/profiles/system
 List packages in current system generation:
 
 ```
-nix-store --query --references /nix/var/nix/profiles/system
+nix-store --query --requisites /nix/var/nix/profiles/system
 ```
 
 List packages in older generation:
 
 ```
-nix-store --query --references /nix/var/nix/profiles/system-147-link
+nix-store --query --requisites /nix/var/nix/profiles/system-147-link
 ```
 
 Garbage collection. If you need to cleanup old kernels run `nix-collect-garbage` and
@@ -38,17 +38,17 @@ sudo nix-env --profile /nix/var/nix/profiles/system --delete-generations 225 224
 # Patch a build:
 
 ```
--self: super:
--{
--  gnupg = super.gnupg.overrideAttrs
--    ({ patches ? [], ... }: {
--      patches =  patches ++ [ ./0001-Revert-scd-Add-workaround-for-ECC-attribute-on-Yubik.patch ];
--    });
--}
+self: super:
+{
+  gnupg = super.gnupg.overrideAttrs
+    ({ patches ? [], ... }: {
+      patches =  patches ++ [ ./0001-Revert-scd-Add-workaround-for-ECC-attribute-on-Yubik.patch ];
+    });
+}
 
 #
   nixpkgs.overlays = [
--    (import ./overlays/gnupg.nix)
+    (import ./overlays/gnupg.nix)
 
 ```
 
@@ -78,6 +78,12 @@ Pin an old version:
 +    pinGPGPkgs.gnupg
 ```
 
+Override fetch* version:
+
+```
+
+```
+
 # Build a package
 
 To build a local package with dependencies, where the local package is systray-inbox.nix:
@@ -85,3 +91,23 @@ To build a local package with dependencies, where the local package is systray-i
 ```
 $ nix-build -K -E 'with import <nixpkgs> {}; callPackage ./systray-inbox.nix {}'
 ```
+
+
+# Language
+
+Its common to see things like:
+```
+{ config, pkgs, ...}:
+...
+```
+
+That is a function definition that takes an attribute set that at least includes attributes named `config` and `pkgs`.
+
+Like wise:
+
+```
+self: super:
+{...}
+```
+
+This is a curried function that takes `self` and then `super`.
